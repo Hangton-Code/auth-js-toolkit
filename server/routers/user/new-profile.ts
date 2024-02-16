@@ -20,6 +20,16 @@ export const newProfileProcedure = protectedProcedure
     }
 
     // 0: No change for avatar
+
+    // delete abandoned image on minio if any
+    if (session.user.image && (newPicture === 1 || newPicture === 2)) {
+      if (session.user.image.startsWith(process.env.MINIO_APP_URL as string)) {
+        const paths = session.user.image.split("/");
+        const fileName = paths[paths.length - 1];
+        await minioClient.removeObject("auth", "avatars/" + fileName);
+      }
+    }
+
     // 1: Upload new avatar
     if (newPicture === 1) {
       const policy = minioClient.newPostPolicy();
@@ -64,15 +74,6 @@ export const newProfileProcedure = protectedProcedure
           image: null,
         },
       });
-    }
-
-    // delete old picture
-    if (session.user.image && (newPicture === 1 || newPicture === 2)) {
-      if (session.user.image.startsWith(process.env.MINIO_APP_URL as string)) {
-        const paths = session.user.image.split("/");
-        const fileName = paths[paths.length - 1];
-        await minioClient.removeObject("auth", "avatars/" + fileName);
-      }
     }
 
     return { presignedPost: null, success: "Profile Updated!" };
