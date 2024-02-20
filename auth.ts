@@ -18,8 +18,6 @@ declare module "next-auth" {
   }
 }
 
-// D93780F45311FF489DA681634A230E57
-
 export const {
   handlers: { GET, POST },
   auth,
