@@ -12,7 +12,7 @@ export const changePasswordProcedure = protectedProcedure
     const { user } = opts.ctx.session;
     const { password } = opts.input;
 
-    if (!user.email || !user.id) {
+    if (!user.email) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: `Server Error!`,
