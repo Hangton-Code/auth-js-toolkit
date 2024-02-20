@@ -11,6 +11,13 @@ export const newEmailProcedure = protectedProcedure
     const { email } = opts.input;
     const { user } = opts.ctx.session;
 
+    if (!user.id) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Server Error!`,
+      });
+    }
+
     if (user.email === email) {
       throw new TRPCError({
         code: "BAD_REQUEST",

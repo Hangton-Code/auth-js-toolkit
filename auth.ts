@@ -42,6 +42,9 @@ export const {
     async signIn({ user, account }) {
       if (account?.provider != "credentials") return true;
 
+      // for invalid user id
+      if (!user.id) return false;
+
       const existingUser = await getUserById(user.id);
 
       // Prevent sign in without email verification
@@ -73,7 +76,7 @@ export const {
 
       if (session.user) {
         session.user.name = token.name;
-        session.user.email = token.email;
+        if (token.email) session.user.email = token.email;
         session.user.image = token.picture;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
         session.user.isPasswordEnabled = token.isPasswordEnabled as boolean;

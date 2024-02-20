@@ -1,10 +1,9 @@
 import { auth } from "@/auth";
 import { publicProcedure } from "./trpc";
-import { Session } from "next-auth/types";
+import { Session } from "next-auth";
 import { TRPCError } from "@trpc/server";
 
 type Context = {
-  // user is nullable
   session: Session;
 };
 
