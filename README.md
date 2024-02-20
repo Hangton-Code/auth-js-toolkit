@@ -40,3 +40,4 @@ NEXT_PUBLIC_APP_URL=
 # Remarks
 
 1. Recommend to stay `@tanstack/react-query` at v4 so as to peer with `@trpc/client`
+2. Recommend to stay `next-auth` at @5.0.0-beta.4 and `@auth/prisma-adapter` at @1.0.14 respectively so as to make sure the code runs with no error
