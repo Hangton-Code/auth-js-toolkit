@@ -36,3 +36,7 @@ NEXT_PUBLIC_APP_URL=
 
 ![](login.png)
 ![](account.png)
+
+# Remarks
+
+1. Recommend to stay `@tanstack/react-query` at v4 so as to peer with `@trpc/client`
