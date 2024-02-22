@@ -7,6 +7,7 @@ import {
   publicRoutes,
 } from "@/routes";
 import { NextResponse } from "next/server";
+import { matchRoutes } from "./lib/wildcard-match";
 
 const { auth } = NextAuth(authConfig);
 
@@ -18,7 +19,7 @@ export default auth((req) => {
   console.log("IS LOGGEDIN:", isLoggedIn);
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isPublicRoute = matchRoutes(nextUrl.pathname, publicRoutes);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {

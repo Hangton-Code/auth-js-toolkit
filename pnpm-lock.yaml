@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@auth/prisma-adapter':
-    specifier: ^1.0.14
+    specifier: 1.0.14
     version: 1.0.14(@prisma/client@5.10.0)
   '@hookform/resolvers':
     specifier: ^3.3.4
@@ -101,6 +101,9 @@ dependencies:
   uuid:
     specifier: ^9.0.1
     version: 9.0.1
+  wildcard:
+    specifier: ^2.0.1
+    version: 2.0.1
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -4177,6 +4180,10 @@ packages:
     resolution: {integrity: sha512-eDMORYaPNZ4sQIuuYPDHdQvf4gyCF9rEEV/yPxGfwPkRodwEgiMUUXTx/dex+Me0wxx53S+NgUHaP7y3MGlDmg==}
     dependencies:
       string-width: 4.2.3
+    dev: false
+
+  /wildcard@2.0.1:
+    resolution: {integrity: sha512-CC1bOL87PIWSBhDcTrdeLo6eGT7mCFtrg0uIJtqJUFyK+eJnzl8A1niH56uu7KMa5XFrtiV+AQuHO3n7DsHnLQ==}
     dev: false
 
   /wrap-ansi@7.0.0:
