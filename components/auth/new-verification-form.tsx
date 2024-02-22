@@ -9,9 +9,11 @@ import { z } from "zod";
 import { newVerification } from "@/actions/new-verification";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
+import { useSession } from "next-auth/react";
 
 export const NewVerificationForm = () => {
   const searchParams = useSearchParams();
+  const { update } = useSession();
   const token = searchParams.get("token");
   const [error, setError] = useState<string | undefined>();
 
@@ -27,8 +29,8 @@ export const NewVerificationForm = () => {
       return;
     }
 
-    const result = await z.string().uuid().safeParseAsync(token);
-    if (!result.success) {
+    const validationResult = await z.string().uuid().safeParseAsync(token);
+    if (!validationResult.success) {
       setError("Invalid Token!");
       return;
     }
@@ -39,6 +41,12 @@ export const NewVerificationForm = () => {
   useEffect(() => {
     onSubmit();
   }, [onSubmit]);
+
+  useEffect(() => {
+    if (mutation.data?.success) {
+      update();
+    }
+  }, [mutation.data, update]);
 
   return (
     <CardWrapper

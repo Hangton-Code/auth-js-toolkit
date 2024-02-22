@@ -20,10 +20,12 @@ import { FormSuccess } from "../form-success";
 import { useMutation } from "@tanstack/react-query";
 import { newPassword } from "@/actions/new-password";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export const NewPasswordForm = () => {
   const searchParams = useSearchParams();
+  const { update } = useSession();
   const token = searchParams.get("token");
   const [error, setError] = useState<string | undefined>();
 
@@ -54,6 +56,12 @@ export const NewPasswordForm = () => {
 
     const result = await mutation.mutateAsync({ token, values });
   };
+
+  useEffect(() => {
+    if (mutation.data?.success) {
+      update();
+    }
+  }, [mutation.data, update]);
 
   return (
     <CardWrapper
