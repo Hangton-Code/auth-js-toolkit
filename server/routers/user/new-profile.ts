@@ -4,6 +4,8 @@ import { NewProfileSchema } from "@/schemas";
 import { protectedProcedure } from "@/server/middlewares";
 import { v4 as uuidv4 } from "uuid";
 
+const bucketName = process.env.MINIO_AUTH_BUCKET as string;
+
 export const newProfileProcedure = protectedProcedure
   .input(NewProfileSchema)
   .mutation(async (opts) => {
@@ -26,7 +28,7 @@ export const newProfileProcedure = protectedProcedure
       if (session.user.image.startsWith(process.env.MINIO_APP_URL as string)) {
         const paths = session.user.image.split("/");
         const fileName = paths[paths.length - 1];
-        await minioClient.removeObject("auth", "avatars/" + fileName);
+        await minioClient.removeObject(bucketName, "avatars/" + fileName);
       }
     }
 
@@ -34,7 +36,7 @@ export const newProfileProcedure = protectedProcedure
     if (newPicture === 1) {
       const policy = minioClient.newPostPolicy();
 
-      policy.setBucket("auth");
+      policy.setBucket(bucketName);
 
       // generate name by uuid
       const fileName = uuidv4();
@@ -56,7 +58,9 @@ export const newProfileProcedure = protectedProcedure
         where: { id: session.user.id },
         data: {
           image:
-            (process.env.MINIO_APP_URL as string) + "/auth/avatars/" + fileName,
+            (process.env.MINIO_APP_URL as string) +
+            `${bucketName}/avatars/` +
+            fileName,
         },
       });
 

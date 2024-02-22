@@ -27,6 +27,7 @@ RESEND_API_KEY=
 RESEND_ONBOARDING_EMAIL=
 MINIO_ACCESS_KEY=
 MINIO_SECRET_KEY=
+MINIO_AUTH_BUCKET=
 MINIO_END_POINT=
 MINIO_APP_URL=
 MINIO_PORT=
@@ -42,3 +43,4 @@ NEXT_PUBLIC_APP_URL=
 
 1. Recommend to stay `@tanstack/react-query` at v4 so as to peer with `@trpc/client`
 2. Recommend to stay `next-auth` at @5.0.0-beta.4 and `@auth/prisma-adapter` at @1.0.14 respectively so as to make sure the code runs with no error
+3. Remember to set a public download access policy for minio avatars folder: `mc anonymous set download <alias>/<bucket>/avatars`
