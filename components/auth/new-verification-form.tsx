@@ -46,7 +46,7 @@ export const NewVerificationForm = () => {
     if (mutation.data?.success) {
       update();
     }
-  }, [mutation.data, update]);
+  }, [mutation.data]);
 
   return (
     <CardWrapper

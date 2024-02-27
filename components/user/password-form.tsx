@@ -20,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FormError } from "../form-error";
 import { useToast } from "@/components/ui/use-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 interface ChangePasswordFormProps {
   setDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -29,6 +30,7 @@ export const ChangePasswordForm = ({
   setDialogOpen,
 }: ChangePasswordFormProps) => {
   const { toast } = useToast();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const form = useForm<z.infer<typeof ChangePasswordSchema>>({
     resolver: zodResolver(ChangePasswordSchema),
@@ -49,7 +51,14 @@ export const ChangePasswordForm = ({
 
     setError("");
 
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("user");
+
+    const result = await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
 
     toast({
       title: result.success,

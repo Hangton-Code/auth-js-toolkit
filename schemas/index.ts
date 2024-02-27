@@ -6,6 +6,18 @@ export const LoginSchema = z.object({
     message: "Password is required",
   }),
   twoFactorCode: z.string().optional(),
+  reCaptchaToken: z.string(),
+});
+
+export const AuthJSCredentialSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1, {
+    message: "Password is required",
+  }),
+});
+
+export const TRPCReCaptchaSchema = z.object({
+  reCaptchaToken: z.string(),
 });
 
 export const RegisterSchema = z
@@ -19,6 +31,7 @@ export const RegisterSchema = z
         message: "Name is required",
       })
       .max(50),
+    reCaptchaToken: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -27,12 +40,14 @@ export const RegisterSchema = z
 
 export const ResetSchema = z.object({
   email: z.string().email(),
+  reCaptchaToken: z.string(),
 });
 
 export const NewPasswordSchema = z
   .object({
     password: z.string().trim().min(6),
     confirmPassword: z.string(),
+    reCaptchaToken: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

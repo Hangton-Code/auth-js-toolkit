@@ -20,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { FormError } from "../form-error";
 import { useToast } from "@/components/ui/use-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 interface EmailFormProps {
   setDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -28,6 +29,7 @@ interface EmailFormProps {
 export const EmailForm = ({ setDialogOpen }: EmailFormProps) => {
   const user = useCurrentUser();
   const { toast } = useToast();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const form = useForm<z.infer<typeof NewEmailSchema>>({
     resolver: zodResolver(NewEmailSchema),
@@ -39,7 +41,14 @@ export const EmailForm = ({ setDialogOpen }: EmailFormProps) => {
   const mutation = trpc.user.newEmail.useMutation();
 
   const onSubmit = async (values: z.infer<typeof NewEmailSchema>) => {
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("user");
+
+    const result = await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
 
     toast({
       title: result.success,

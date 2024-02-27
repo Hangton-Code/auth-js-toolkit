@@ -20,18 +20,16 @@ import { FormSuccess } from "../form-success";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { reset } from "@/actions/reset";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const ResetForm = () => {
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with different provider!"
-      : "";
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const form = useForm<z.infer<typeof ResetSchema>>({
     resolver: zodResolver(ResetSchema),
     defaultValues: {
       email: "",
+      reCaptchaToken: "",
     },
   });
 
@@ -42,7 +40,14 @@ export const ResetForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof ResetSchema>) => {
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("reset");
+
+    await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
   };
 
   return (
@@ -73,7 +78,7 @@ export const ResetForm = () => {
             />
           </div>
           {!mutation.data?.success && (
-            <FormError message={urlError || mutation.data?.error} />
+            <FormError message={mutation.data?.error} />
           )}
           <FormSuccess message={mutation.data?.success} />
           <Button

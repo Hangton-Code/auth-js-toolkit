@@ -5,6 +5,7 @@ import Provider from "./_trpc/Provider";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/toaster";
+import { ReCaptchaProvider } from "./_recaptcha/ReCaptchaProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const epilogue = Epilogue({ subsets: ["latin"], variable: "--font-epilogue" });
@@ -26,8 +27,10 @@ export default async function RootLayout({
         <body
           className={`${inter.variable} ${epilogue.variable} ${epilogue.variable} font-sans`}
         >
-          <Provider>{children}</Provider>
-          <Toaster />
+          <ReCaptchaProvider>
+            <Provider>{children}</Provider>
+            <Toaster />
+          </ReCaptchaProvider>
         </body>
       </html>
     </SessionProvider>

@@ -6,14 +6,22 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const TwoFactorSection = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const user = useCurrentUser();
   const { update } = useSession();
   const mutation = trpc.user.toggleTwoFactor.useMutation();
 
   const onChange = async () => {
-    const result = await mutation.mutateAsync();
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("user");
+
+    const result = await mutation.mutateAsync({
+      reCaptchaToken,
+    });
 
     toast({
       title: result.success,

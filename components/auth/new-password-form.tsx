@@ -22,8 +22,10 @@ import { newPassword } from "@/actions/new-password";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const NewPasswordForm = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const searchParams = useSearchParams();
   const { update } = useSession();
   const token = searchParams.get("token");
@@ -34,6 +36,7 @@ export const NewPasswordForm = () => {
     defaultValues: {
       password: "",
       confirmPassword: "",
+      reCaptchaToken: "",
     },
   });
   const mutation = useMutation({
@@ -54,14 +57,24 @@ export const NewPasswordForm = () => {
       return;
     }
 
-    const result = await mutation.mutateAsync({ token, values });
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("login");
+
+    const result = await mutation.mutateAsync({
+      token,
+      values: {
+        ...values,
+        reCaptchaToken,
+      },
+    });
   };
 
   useEffect(() => {
     if (mutation.data?.success) {
       update();
     }
-  }, [mutation.data, update]);
+  }, [mutation.data]);
 
   return (
     <CardWrapper

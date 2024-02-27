@@ -48,14 +48,18 @@ model User {
 }
 
 model VerificationToken {
-  id      String   @id @default(cuid())
-  userId  String
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  email   String
-  token   String   @unique
-  expires DateTime
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email          String
+  name           String?
+  hashedPassword String?
+  token          String   @unique
+  expires        DateTime
 
-  @@unique([userId, email, token])
+  @@unique([email, token])
+  @@unique([userId, token])
+  @@unique([email, userId, token])
 }
 
 model PasswordResetToken {

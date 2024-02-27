@@ -6,6 +6,7 @@ import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
 import { sendVerificationEmail, sendTwoFactorEmail } from "@/lib/mail";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import {
   generateVerificationToken,
   generateTwoFactorToken,
@@ -22,7 +23,14 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, twoFactorCode } = validatedFields.data;
+  const { email, password, twoFactorCode, reCaptchaToken } =
+    validatedFields.data;
+
+  // verify reCaptcha
+  const { success } = await verifyRecaptcha(reCaptchaToken);
+  if (!success) {
+    return { error: "reCaptcha failed!" };
+  }
 
   const existingUser = await getUserByEmail(email);
 

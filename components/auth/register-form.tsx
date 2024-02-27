@@ -7,7 +7,6 @@ import { RegisterSchema } from "@/schemas";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,8 +19,10 @@ import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "@/actions/register";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const RegisterForm = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -29,6 +30,7 @@ export const RegisterForm = () => {
       password: "",
       confirmPassword: "",
       name: "",
+      reCaptchaToken: "",
     },
   });
   const mutation = useMutation({
@@ -38,7 +40,14 @@ export const RegisterForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("register");
+
+    await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
   };
 
   return (

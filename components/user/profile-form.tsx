@@ -23,12 +23,14 @@ import { toBase64Url } from "@/lib/base64";
 import { compressImageAsync } from "@/lib/compress";
 import { objectToFormData } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 interface ProfileFormProps {
   setDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const ProfileForm = ({ setDialogOpen }: ProfileFormProps) => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const user = useCurrentUser();
   const avatar = useAvatar();
   const { update } = useSession();
@@ -80,7 +82,14 @@ export const ProfileForm = ({ setDialogOpen }: ProfileFormProps) => {
   const [error, setError] = useState("");
 
   const onSubmit = async (values: z.infer<typeof NewProfileSchema>) => {
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("user");
+
+    const result = await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
 
     if (result.presignedPost && fileUpload) {
       const { postURL, formData } = result.presignedPost;

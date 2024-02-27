@@ -5,8 +5,9 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
-import { generateVerificationToken } from "@/lib/tokens";
+import { generateRegisterToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
@@ -15,7 +16,13 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, name } = validatedFields.data;
+  const { email, password, name, reCaptchaToken } = validatedFields.data;
+
+  // verify reCaptcha
+  const { success } = await verifyRecaptcha(reCaptchaToken);
+  if (!success) {
+    return { error: "reCaptcha failed!" };
+  }
 
   const existingUser = await getUserByEmail(email);
 
@@ -24,15 +31,12 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await db.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  });
 
-  const verificationToken = await generateVerificationToken(user.id, email);
+  const verificationToken = await generateRegisterToken(
+    email,
+    name,
+    hashedPassword
+  );
   await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
   return { success: "Confirmation Email Sent!" };

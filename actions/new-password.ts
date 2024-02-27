@@ -6,6 +6,7 @@ import { getPasswordResetTokenByToken } from "@/data/password-token";
 import { z } from "zod";
 import { NewPasswordSchema } from "@/schemas";
 import bcrypt from "bcryptjs";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export const newPassword = async (
   token: string,
@@ -18,7 +19,13 @@ export const newPassword = async (
     return { error: "Invalid fields!" };
   }
 
-  const { password } = validatedFields.data;
+  const { password, reCaptchaToken } = validatedFields.data;
+
+  // verify reCaptcha
+  const { success } = await verifyRecaptcha(reCaptchaToken);
+  if (!success) {
+    return { error: "reCaptcha failed!" };
+  }
 
   // validate the token
   const existingToken = await getPasswordResetTokenByToken(token);

@@ -22,8 +22,10 @@ import { login } from "@/actions/login";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const LoginForm = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const searchParams = useSearchParams();
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
@@ -35,6 +37,7 @@ export const LoginForm = () => {
     defaultValues: {
       email: "",
       password: "",
+      reCaptchaToken: "",
     },
   });
 
@@ -47,7 +50,14 @@ export const LoginForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
-    const result = await mutation.mutateAsync(values);
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("login");
+
+    const result = await mutation.mutateAsync({
+      ...values,
+      reCaptchaToken,
+    });
 
     if (!result?.twoFactor) {
       form.reset();
