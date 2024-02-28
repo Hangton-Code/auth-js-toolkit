@@ -13,8 +13,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ChangePasswordForm } from "./password-form";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 export const PasswordSection = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const user = useCurrentUser();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -31,7 +33,11 @@ export const PasswordSection = () => {
   }, [mutation.error]);
 
   const setAPassword = async () => {
-    const result = await mutation.mutateAsync({});
+    if (!executeRecaptcha) return;
+
+    const reCaptchaToken = await executeRecaptcha("user");
+
+    const result = await mutation.mutateAsync({ reCaptchaToken });
 
     toast({ title: result.success });
   };
